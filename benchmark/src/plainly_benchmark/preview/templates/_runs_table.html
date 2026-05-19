@@ -1,0 +1,28 @@
+<table role="grid">
+  <thead>
+    <tr>
+      <th>timestamp</th>
+      <th>backend</th>
+      <th>model</th>
+      <th class="num">prompts</th>
+      <th class="num">styles</th>
+      <th class="num">samples</th>
+      <th class="num">rows</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in runs %}
+      <tr>
+        <td><a href="{{ url_for('run_page', ts=r.ts) }}">{{ r.ts }}</a></td>
+        <td>{{ r.meta.get('backend', '?') }}</td>
+        <td>{{ r.meta.get('model', '?') }}</td>
+        <td class="num">{{ r.meta.get('prompts', [])|length }}</td>
+        <td class="num">{{ r.meta.get('styles', [])|length }}</td>
+        <td class="num">{{ r.meta.get('samples', 1) }}</td>
+        <td class="num">
+          {{ r.n_rows }}{% if r.n_rows < r.expected %}<span class="stale"> / {{ r.expected }}</span>{% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

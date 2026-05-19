@@ -1,0 +1,41 @@
+<table class="matrix" role="grid">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>prompt</th>
+      <th>targets</th>
+      {% for sid in run.styles %}<th>{{ sid }}</th>{% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for slug, prompt in run.prompts.items() %}
+      <tr>
+        <td class="num">{{ prompt.id }}</td>
+        <td><a href="#p-{{ slug }}">{{ prompt.title }}</a></td>
+        <td><small>{{ prompt.targets|join(', ') }}</small></td>
+        {% for sid in run.styles %}
+          {% set cells = run.grouped.get(slug, {}).get(sid, []) %}
+          <td class="cell">
+            {% if cells %}
+              {% set tok = (cells|map(attribute='output_tokens')|sum) // (cells|length) %}
+              {% set lat = (cells|map(attribute='latency_ms')|sum) // (cells|length) %}
+              {% set words = (cells|map(attribute='output')|map('word_count')|sum) // (cells|length) %}
+              {% set scored = cells|selectattr('combined', 'defined')|list %}
+              {% if scored %}
+                {% set comb = (scored|map(attribute='combined')|sum) / (scored|length) %}
+                {% set cos = (scored|map(attribute='cosine')|sum) / (scored|length) %}
+                {% set lensim = (scored|map(attribute='length_sim')|sum) / (scored|length) %}
+                <span class="score" title="cosine {{ '%.2f' % cos }} · length {{ '%.2f' % lensim }}">{{ '%.2f' % comb }}</span><br>
+              {% endif %}
+              <span class="tok">{{ tok }} t</span><br>
+              <span class="words">{{ words }} w</span><br>
+              <span class="lat">{{ '%.1f' % (lat / 1000) }}s</span>
+            {% else %}
+              <span class="empty">—</span>
+            {% endif %}
+          </td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

@@ -1,0 +1,22 @@
+{
+  "prompt_id": 1,
+  "note": "Variants for rest-vs-grpc V3 prompt. Range from verbose to terse so we can eyeball whether scoring tracks intuition.",
+  "variants": [
+    {
+      "label": "verbose-long",
+      "text": "Short answer: \"better\" depends on what you're optimizing for. gRPC has real advantages, but they're not free.\n\n**Where gRPC genuinely wins:**\n- Strongly-typed contracts via protobuf — no more arguing about JSON shapes or stale API docs\n- Streaming (bidirectional, server-push) is first-class; with REST you end up bolting on WebSockets or SSE\n- Lower latency and smaller payloads on high-volume service-to-service calls\n- Code generation across languages keeps clients and servers in sync\n\n**What the new team probably isn't mentioning:**\n- Your existing tooling (logging, tracing, auth middleware, load balancers, API gateways) is built around HTTP/JSON. gRPC needs new plumbing — especially L7 load balancing, since gRPC reuses connections.\n- Debugging is harder: no `curl`, no readable payloads in logs, browsers can't call it directly without grpc-web\n- Two RPC styles in one backend means two sets of conventions, two client libraries per consumer, double the onboarding cost\n- The performance win only matters if you're actually hitting REST's limits. For most internal CRUD, it's noise.\n\n**The real question to push back with:** what specific problem is gRPC solving for them? If the answer is \"streaming\" or \"polyglot services with strict contracts,\" fair. If it's \"gRPC is better,\" that's cargo-culting — and you'll pay for the inconsistency forever."
+    },
+    {
+      "label": "prose-medium",
+      "text": "Honestly? They're half right.\n\ngRPC is genuinely better at a few specific things — streaming, strict typed contracts between services, and raw performance when you're moving a lot of traffic. If that's what they're hitting, it's a reasonable call.\n\nBut \"better for internal services\" as a blanket statement is a red flag. The cost you'd be signing up for is real: your whole REST ecosystem (logging, tracing, gateways, debugging habits) doesn't carry over cleanly, and now every engineer has to know both.\n\nI'd ask them one question: what's the specific problem REST isn't solving for you? If they have a concrete answer, listen. If it's vibes, push back."
+    },
+    {
+      "label": "prose-terse",
+      "text": "They're partly right.\n\ngRPC wins at three things: streaming, strict typed contracts, and performance under heavy traffic. For those, it's the better tool.\n\nThe cost they're skipping over: your REST tooling (logging, tracing, gateways, debugging) doesn't transfer. Every engineer now learns two stacks.\n\nAsk them: what specific problem does REST not solve here? Concrete answer — fine. Vague answer — it's cargo-culting."
+    },
+    {
+      "label": "bullets-balanced",
+      "text": "gRPC wins at a few things:\n- **Streaming** — bidirectional and server-push are first-class, not bolted on like WebSockets/SSE over REST.\n- **Typed contracts** — protobuf kills \"what shape is this JSON\" debates and keeps clients in sync via codegen.\n- **Performance** — smaller payloads, lower latency, matters when traffic is heavy.\n\nWhat they're likely skipping:\n- Your REST tooling (curl, logs, tracing, gateways, browser) doesn't transfer — gRPC needs different plumbing.\n- Debugging is harder: no readable payloads, no browser access.\n- Two stacks in one backend means double the conventions forever."
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "id": 2,
+  "title": "Explain OAuth2 to a newbie",
+  "targets": ["PRE", "STR", "SUM"],
+  "ideal_answer": "OAuth2 lets an app act on your behalf without ever seeing your password.\n\nThe flow, simplified:\n1. App redirects you to the provider (Google, GitHub, etc.) to log in\n2. You approve the permissions it's asking for\n3. Provider sends you back to the app with a temporary code\n4. App swaps that code for an **access token** (server-to-server, hidden from you)\n5. App uses the token to call APIs on your behalf\n\nThe token is scoped (only certain permissions) and expires. That's the whole point — limited, revocable access instead of handing over credentials.\n\nStart with the **Authorization Code flow** — it's the standard for web apps and the one most tutorials assume.",
+  "prompt": "Can you explain how OAuth2 works? I'm new to it and just want to understand the basic flow.\n"
+}

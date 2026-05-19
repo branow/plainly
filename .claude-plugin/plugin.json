@@ -1,0 +1,19 @@
+{
+  "name": "plainly",
+  "description": "Output style that makes Claude write for the human reading it.",
+  "version": "0.1.0",
+  "author": {
+    "name": "branow",
+    "email": "branow.code@gmail.com"
+  },
+  "homepage": "https://github.com/branow/plainly",
+  "repository": "https://github.com/branow/plainly",
+  "license": "MIT",
+  "keywords": [
+    "output-style",
+    "claude-code",
+    "concise",
+    "plainly",
+    "readability"
+  ]
+}

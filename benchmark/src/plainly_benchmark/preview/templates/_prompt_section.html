@@ -1,0 +1,27 @@
+{% from "_macros.html" import expandable_text %}
+
+<h3 id="p-{{ slug }}">
+  {{ prompt.id }}. {{ prompt.title }}
+  <span class="targets">[{{ prompt.targets|join(', ') }}]</span>
+</h3>
+
+<section class="prompt-block">
+  <h4 class="block-label">prompt</h4>
+  {{ expandable_text(prompt.prompt, 100) }}
+</section>
+
+{% if prompt.get('ideal_answer') %}
+<section class="ideal-block">
+  <h4 class="block-label">ideal answer</h4>
+  {{ expandable_text(prompt.ideal_answer, 100) }}
+</section>
+{% endif %}
+
+<h4 class="block-label">responses</h4>
+<div class="grid-styles">
+  {% for sid in run.styles %}
+    {% for row in run.grouped.get(slug, {}).get(sid, []) %}
+      {% include "_sample_card.html" %}
+    {% endfor %}
+  {% endfor %}
+</div>

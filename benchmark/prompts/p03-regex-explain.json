@@ -1,0 +1,7 @@
+{
+  "id": 3,
+  "title": "Explain a small regex",
+  "targets": ["PRE", "DMP", "SUM"],
+  "ideal_answer": "Matches strings that are 8+ characters long, contain at least one uppercase letter, and at least one digit.\n\nTypical password rule check.",
+  "prompt": "What does this regex do?\n\n```\n^(?=.*[A-Z])(?=.*\\d).{8,}$\n```\n"
+}

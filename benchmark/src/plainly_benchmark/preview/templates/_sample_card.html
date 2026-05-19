@@ -1,0 +1,21 @@
+{% from "_macros.html" import expandable_text %}
+
+<article class="sample-card">
+  <header>
+    <strong>{{ row.style_id }}</strong> #{{ row.sample }}
+    {% if row.combined is defined %}
+      <span class="score-pill" title="cosine {{ '%.3f' % row.cosine }} · length {{ '%.3f' % row.length_sim }}">score {{ '%.2f' % row.combined }}</span>
+    {% endif %}
+  </header>
+  <div class="cell-meta">
+    out: {{ row.output_tokens }} tok,
+    in: {{ row.input_tokens }} tok,
+    {{ '%.1f' % (row.latency_ms / 1000) }}s,
+    stop: {{ row.stop_reason }}
+    {% if row.combined is defined %}
+      <br>cosine: {{ '%.3f' % row.cosine }} · length_sim: {{ '%.3f' % row.length_sim }}
+      ({{ row.response_words }} words vs {{ row.ideal_words }} ideal)
+    {% endif %}
+  </div>
+  {{ expandable_text(row.output, 250) }}
+</article>

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% from "_macros.html" import expandable_text %}
+{% block title %}prompts · plainly{% endblock %}
+
+{# Known fields get dedicated rendering. Anything else lands in "other". #}
+{% set KNOWN = ['id', 'slug', 'title', 'targets', 'prompt', 'ideal_answer'] %}
+
+{% block content %}
+<h2>Prompt corpus</h2>
+<dl class="run-meta">
+  <div class="pair"><dt>prompts</dt><dd>{{ prompts|length }}</dd></div>
+</dl>
+
+<h3>Index</h3>
+<table role="grid">
+  <thead>
+    <tr>
+      <th class="num">#</th>
+      <th>slug</th>
+      <th>title</th>
+      <th>targets</th>
+      <th class="num">prompt words</th>
+      <th class="num">ideal words</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in prompts %}
+      <tr>
+        <td class="num">{{ p.id }}</td>
+        <td><a href="#p-{{ p.slug }}"><code>{{ p.slug }}</code></a></td>
+        <td>{{ p.title }}</td>
+        <td><small>{{ p.targets|join(', ') }}</small></td>
+        <td class="num">{{ (p.prompt or '')|word_count }}</td>
+        <td class="num">{{ (p.ideal_answer or '')|word_count }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% for p in prompts %}
+  <article id="p-{{ p.slug }}" class="prompt-doc">
+    <h3>{{ p.id }}. {{ p.title }}</h3>
+    <dl class="run-meta">
+      <div class="pair"><dt>slug</dt><dd><code>{{ p.slug }}</code></dd></div>
+      <div class="pair"><dt>id</dt><dd>{{ p.id }}</dd></div>
+      <div class="pair"><dt>targets</dt><dd>{{ p.targets|join(', ') if p.targets else '—' }}</dd></div>
+    </dl>
+
+    <section class="prompt-block">
+      <h4 class="block-label">prompt</h4>
+      {{ expandable_text(p.prompt, 100) }}
+    </section>
+
+    {% if p.ideal_answer %}
+    <section class="ideal-block">
+      <h4 class="block-label">ideal answer</h4>
+      {{ expandable_text(p.ideal_answer, 100) }}
+    </section>
+    {% endif %}
+
+    {% set extra = {} %}
+    {% for k, v in p.items() if k not in KNOWN %}{% if extra.update({k: v}) %}{% endif %}{% endfor %}
+    {% if extra %}
+      <h4 class="block-label">other fields</h4>
+      <dl class="kv">
+        {% for k, v in extra.items() %}
+          <dt>{{ k }}</dt>
+          <dd>
+            {% if v is mapping or v is iterable and v is not string %}
+              <pre class="output">{{ v|tojson(indent=2) }}</pre>
+            {% else %}
+              {{ v }}
+            {% endif %}
+          </dd>
+        {% endfor %}
+      </dl>
+    {% endif %}
+  </article>
+{% endfor %}
+{% endblock %}

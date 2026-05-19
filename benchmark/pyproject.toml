@@ -1,0 +1,33 @@
+[project]
+name = "plainly-benchmark"
+version = "0.1.0"
+description = "Benchmark harness for plainly: compare system-prompt styles head-to-head."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic>=0.102.0",
+    "claude-agent-sdk>=0.2.82",
+    "flask>=3.1.3",
+    "python-dotenv>=1.2.2",
+    "sentence-transformers>=5.5.0",
+]
+
+[project.scripts]
+run-bench = "plainly_benchmark.bench:main"
+score-bench = "plainly_benchmark.score:main"
+preview = "plainly_benchmark.preview:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/plainly_benchmark"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]
+
+[tool.pytest.ini_options]
+addopts = "-s -q --no-header --tb=short"

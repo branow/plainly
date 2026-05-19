@@ -1,0 +1,7 @@
+{
+  "id": 1,
+  "title": "Is gRPC actually better than REST for internal services?",
+  "targets": ["STR", "DUP", "DMP"],
+  "ideal_answer": "gRPC wins at a few things:\n- **Streaming** — bidirectional and server-push are first-class, not bolted on like WebSockets/SSE over REST.\n- **Typed contracts** — protobuf kills \"what shape is this JSON\" debates and keeps clients in sync via codegen.\n- **Performance** — smaller payloads, lower latency, matters when traffic is heavy.\n\nWhat they're likely skipping:\n- Your REST tooling (curl, logs, tracing, gateways, browser) doesn't transfer — gRPC needs different plumbing.\n- Debugging is harder: no readable payloads, no browser access.\n- Two stacks in one backend means double the conventions forever.",
+  "prompt": "We already use REST for everything in our backend. The new team wants gRPC for the service they're building. They say gRPC is better for internal services. Is that true? What am I missing?\n"
+}

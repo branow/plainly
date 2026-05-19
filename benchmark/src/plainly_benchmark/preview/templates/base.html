@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}plainly benchmark{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='preview.css') }}">
+</head>
+<body>
+  <nav class="topbar">
+    <ol class="crumbs">
+      <li><a href="{{ url_for('index') }}">plainly benchmark</a></li>
+      {% block crumbs %}{% endblock %}
+    </ol>
+    <ul class="topnav">
+      <li><a href="{{ url_for('index') }}">runs</a></li>
+      <li><a href="{{ url_for('prompts_page') }}">prompts</a></li>
+      <li><a href="{{ url_for('report_page') }}">report</a></li>
+    </ul>
+    <span class="auto-refresh">auto-refresh on changes</span>
+  </nav>
+
+  {% block content %}{% endblock %}
+
+  <script src="{{ url_for('static', filename='auto-refresh.js') }}"></script>
+</body>
+</html>

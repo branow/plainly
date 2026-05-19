@@ -1,0 +1,29 @@
+{# Reusable rendering helpers. #}
+
+{#
+  Render text as ONE monospace block. If longer than `words`, hide the tail
+  inside the same block and toggle visibility on button click. No <details>,
+  no separate panels — text stays in one flowing block.
+#}
+{% macro expandable_text(text, words=150) %}
+  {% set src = text or '' %}
+  {% set preview, rest = src|word_slice(words) %}
+  {% if rest %}
+    <div class="expand-wrap">
+      <div class="output expand-text"
+        ><span class="preview-part">{{ preview }}</span
+        ><span class="ellipsis">…</span
+        ><span class="rest-part" hidden>{{ rest }}</span></div>
+      <button type="button" class="toggle" onclick="
+        const w=this.parentElement;
+        const rest=w.querySelector('.rest-part');
+        const ell=w.querySelector('.ellipsis');
+        const open=!rest.hasAttribute('hidden');
+        if(open){ rest.setAttribute('hidden',''); ell.hidden=false; this.textContent='Show more'; }
+        else { rest.removeAttribute('hidden'); ell.hidden=true; this.textContent='Show less'; }
+      ">Show more</button>
+    </div>
+  {% else %}
+    <div class="output">{{ src }}</div>
+  {% endif %}
+{% endmacro %}

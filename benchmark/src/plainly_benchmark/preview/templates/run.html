@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{{ run.ts }} · plainly{% endblock %}
+
+{% block crumbs %}
+  <li><a href="{{ url_for('index') }}">runs</a></li>
+  <li><code>{{ run.ts }}</code></li>
+{% endblock %}
+
+{% block content %}
+<h2>{{ run.ts }}</h2>
+<dl class="run-meta">
+  <div class="pair"><dt>backend</dt><dd><code>{{ run.meta.get('backend', '?') }}</code></dd></div>
+  <div class="pair"><dt>model</dt><dd><code>{{ run.meta.get('model', '?') }}</code></dd></div>
+  <div class="pair"><dt>samples</dt><dd>{{ run.meta.get('samples', 1) }}</dd></div>
+  <div class="pair"><dt>rows</dt><dd>{{ run.rows|length }}</dd></div>
+</dl>
+
+<h3>Matrix</h3>
+{% include "_matrix.html" %}
+
+{% for slug, prompt in run.prompts.items() %}
+  {% include "_prompt_section.html" %}
+{% endfor %}
+{% endblock %}

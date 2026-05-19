@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}report · plainly{% endblock %}
+
+{% macro pct(v) -%}
+  {% if v is none %}—{% else %}{{ '%.3f' % v }}{% endif %}
+{%- endmacro %}
+
+{% macro tokstr(v) -%}{{ '%.0f' % v }}{%- endmacro %}
+{% macro latstr(v) -%}{{ '%.1f' % v }}s{%- endmacro %}
+
+{% block content %}
+<h2>Aggregate report</h2>
+<dl class="run-meta">
+  <div class="pair"><dt>runs</dt><dd>{{ report.n_runs }}</dd></div>
+  <div class="pair"><dt>rows</dt><dd>{{ report.n_rows }}</dd></div>
+  <div class="pair"><dt>styles</dt><dd>{{ report.styles|length }}</dd></div>
+  <div class="pair"><dt>models</dt><dd>{{ report.models|length }}</dd></div>
+  <div class="pair"><dt>prompts</dt><dd>{{ report.prompts|length }}</dd></div>
+</dl>
+
+<h3>Style leaderboard</h3>
+<p class="muted">All runs, all models, all prompts. Sorted by combined score.</p>
+<table role="grid">
+  <thead>
+    <tr>
+      <th>style</th>
+      <th class="num">combined</th>
+      <th class="num">cosine</th>
+      <th class="num">length_sim</th>
+      <th class="num">out tok</th>
+      <th class="num">latency</th>
+      <th class="num">rows</th>
+      <th class="num">scored</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for sid, b in report.style_ranking %}
+      <tr>
+        <td><strong>{{ sid }}</strong></td>
+        <td class="num">{{ pct(b.avg_combined) }}</td>
+        <td class="num">{{ pct(b.avg_cosine) }}</td>
+        <td class="num">{{ pct(b.avg_length_sim) }}</td>
+        <td class="num">{{ tokstr(b.avg_out_tokens) }}</td>
+        <td class="num">{{ latstr(b.avg_latency_s) }}</td>
+        <td class="num">{{ b.n }}</td>
+        <td class="num">{{ b.n_scored }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h3>Style × Model</h3>
+<p class="muted">Mean combined score per (style, model) pair. Blank = no data.</p>
+<table role="grid" class="matrix">
+  <thead>
+    <tr>
+      <th>style</th>
+      {% for m in report.models %}<th>{{ m }}</th>{% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for sid in report.styles %}
+      <tr>
+        <td><strong>{{ sid }}</strong></td>
+        {% for m in report.models %}
+          {% set b = report.by_style_model.get((sid, m)) %}
+          <td class="num cell">
+            {% if b and b.n_scored %}
+              <span class="score">{{ pct(b.avg_combined) }}</span><br>
+              <span class="lat">{{ tokstr(b.avg_out_tokens) }} tok · {{ latstr(b.avg_latency_s) }}</span>
+            {% elif b %}
+              <span class="lat">{{ tokstr(b.avg_out_tokens) }} tok · {{ latstr(b.avg_latency_s) }}</span><br>
+              <span class="empty">no scores</span>
+            {% else %}
+              <span class="empty">—</span>
+            {% endif %}
+          </td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h3>Per prompt</h3>
+<p class="muted">For each prompt, mean combined score per style across all runs/models.</p>
+<table role="grid" class="matrix">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>prompt</th>
+      {% for sid in report.styles %}<th>{{ sid }}</th>{% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in report.prompts %}
+      <tr>
+        <td class="num">{{ p.id }}</td>
+        <td>{{ p.title }}</td>
+        {% for sid in report.styles %}
+          {% set b = report.by_prompt_style.get((p.slug, sid)) %}
+          <td class="num cell">
+            {% if b and b.n_scored %}
+              <span class="score">{{ pct(b.avg_combined) }}</span><br>
+              <span class="lat">{{ tokstr(b.avg_out_tokens) }} tok</span>
+            {% elif b %}
+              <span class="lat">{{ tokstr(b.avg_out_tokens) }} tok</span>
+            {% else %}
+              <span class="empty">—</span>
+            {% endif %}
+          </td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

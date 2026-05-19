@@ -1,0 +1,12 @@
+*
+
+!.gitignore
+!.git/
+!benchmark/
+!benchmark/**
+!.claude-plugin/
+!.claude-plugin/**
+!output-styles
+!output-styles/**
+!README.md
+!LICENSE
