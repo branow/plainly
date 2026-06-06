@@ -10,5 +10,7 @@
 !prompt/**
 !hooks
 !hooks/**
+!scripts
+!scripts/**
 !README.md
 !LICENSE

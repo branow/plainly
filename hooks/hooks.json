@@ -4,10 +4,23 @@
       {
         "matcher": "",
         "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/inject.mjs\""
-          }
+          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/inject.mjs\"" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/measure.mjs\"" }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/refocus.mjs\"" }
         ]
       }
     ]

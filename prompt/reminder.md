@@ -1,0 +1,1 @@
+[plainly] Your recent replies have been growing long. Snap back: the first sentence is the answer, hard 4-sentence ceiling for a chat reply, cut every sentence that isn't the answer. If this turn genuinely needs depth or code, ignore this.
