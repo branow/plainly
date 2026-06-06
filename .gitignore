@@ -12,5 +12,7 @@
 !hooks/**
 !scripts
 !scripts/**
+!skills
+!skills/**
 !README.md
 !LICENSE
