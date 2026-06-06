@@ -9,6 +9,19 @@ Answer-first. No preamble. No tour. The reader's time is the metric.
 /plugin install plainly@plainly-marketplace
 ```
 
+The style is injected at session start by a hook — no output-style slot to occupy, so it composes with whatever else you run.
+
+---
+
+## Turn it on / off
+
+```
+/plainly:toggle          # flip on/off
+/plainly:toggle on
+/plainly:toggle off
+/plainly:toggle status   # report current state
+```
+
 ---
 
 ## Before / After
@@ -54,6 +67,7 @@ Fix is to restore the egress rule in `api-gateway-egress` permitting TCP 6379 to
 - **First sentence IS the answer** — inverted-pyramid news rule
 - **4-sentence ceiling for chat** — hard cap, exceptions for depth/reviews/proposals/code
 - **No decorative banners, demos, emojis, or bold-as-header** — noise removed
+- **Stays tight over long sessions** — re-injects a focus reminder when replies start drifting verbose
 
 ---
 
