@@ -6,7 +6,9 @@
 !benchmark/**
 !.claude-plugin/
 !.claude-plugin/**
-!output-styles
-!output-styles/**
+!prompt
+!prompt/**
+!hooks
+!hooks/**
 !README.md
 !LICENSE

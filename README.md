@@ -1,6 +1,6 @@
 # plainly
 
-An output style that makes AI coding agents write for the human reading it.
+A plugin that makes AI coding agents write for the human reading it.
 Answer-first. No preamble. No tour. The reader's time is the metric.
 ~60% shorter responses, ~2× faster — the natural consequence.
 

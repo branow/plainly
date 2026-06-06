@@ -1,6 +1,6 @@
 {
   "name": "plainly",
-  "description": "Output style that makes Claude write for the human reading it.",
+  "description": "Plugin that makes Claude write for the human reading it.",
   "version": "0.1.0",
   "author": {
     "name": "branow",
