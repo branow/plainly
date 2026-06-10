@@ -17,7 +17,7 @@ const CONFIG_DIR =
 // runtime, e.g. in tests.
 export const DATA_DIR =
   process.env.CLAUDE_PLUGIN_DATA ||
-  join(CONFIG_DIR, "plugins", "data", "plainly-plainly");
+  join(CONFIG_DIR, "plugins", "data", "plainly-plainly-marketplace");
 
 export const STATE_FILE = join(DATA_DIR, "plainly.state");
 
