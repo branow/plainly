@@ -29,6 +29,7 @@ def run(
 
     meta = {
         "timestamp": ts,
+        "type": "bench",
         "backend": backend.name,
         "model": model,
         "samples": samples,

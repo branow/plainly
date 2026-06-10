@@ -8,12 +8,14 @@ dependencies = [
     "anthropic>=0.102.0",
     "claude-agent-sdk>=0.2.82",
     "flask>=3.1.3",
+    "matplotlib>=3.9",
     "python-dotenv>=1.2.2",
     "sentence-transformers>=5.5.0",
 ]
 
 [project.scripts]
 run-bench = "plainly_benchmark.bench:main"
+growth-bench = "plainly_benchmark.growth:main"
 score-bench = "plainly_benchmark.score:main"
 preview = "plainly_benchmark.preview:main"
 
