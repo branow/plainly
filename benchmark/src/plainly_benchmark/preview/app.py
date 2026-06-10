@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import re
 
-from flask import Flask, abort, jsonify, render_template
+from flask import Flask, Response, abort, jsonify, render_template
 
 from ..core import load_prompts
-from . import data
+from . import data, growth
 from .report import build_report
 
 
@@ -51,7 +51,22 @@ def create_app() -> Flask:
         run = data.load_run(ts)
         if run is None:
             abort(404)
+        if isinstance(run, data.GrowthRun):
+            return render_template(
+                "growth_run.html",
+                run=run,
+                summary=growth.summarize(run.rows, run.meta.get("model", "?")),
+                charts=growth.CHARTS,
+                prose_words=growth.prose_words,
+            )
         return render_template("run.html", run=run)
+
+    @app.get("/run/<ts>/growth-chart/<name>.png")
+    def growth_chart(ts: str, name: str):
+        run = data.load_run(ts)
+        if not isinstance(run, data.GrowthRun) or name not in growth.CHARTS:
+            abort(404)
+        return Response(growth.chart_png(run.rows, name), mimetype="image/png")
 
     @app.get("/report")
     def report_page():

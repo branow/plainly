@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}{{ run.ts }} · plainly{% endblock %}
+
+{% block crumbs %}
+  <li><a href="{{ url_for('index') }}">runs</a></li>
+  <li><code>{{ run.ts }}</code></li>
+{% endblock %}
+
+{% block content %}
+<h2>{{ run.ts }} <small>(growth)</small></h2>
+<dl class="run-meta">
+  <div class="pair"><dt>backend</dt><dd><code>{{ run.meta.get('backend', '?') }}</code></dd></div>
+  <div class="pair"><dt>model</dt><dd><code>{{ run.meta.get('model', '?') }}</code></dd></div>
+  <div class="pair"><dt>turns</dt><dd>{{ run.meta.get('turns', '?') }}</dd></div>
+  <div class="pair"><dt>styles</dt><dd>{{ run.meta.get('styles', [])|join(', ') }}</dd></div>
+  <div class="pair"><dt>rows</dt><dd>{{ run.rows|length }}</dd></div>
+</dl>
+
+<h3>Summary</h3>
+<table role="grid">
+  <thead>
+    <tr>
+      <th>style</th>
+      <th class="num">input tokens</th>
+      <th class="num">output tokens</th>
+      <th class="num">total tokens</th>
+      <th class="num">final context</th>
+      <th class="num">avg words/reply</th>
+      <th class="num">avg latency (s)</th>
+      <th class="num">reinjections</th>
+      <th class="num">est cost ($)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for sid, s in summary.items() %}
+      <tr>
+        <td><code>{{ sid }}</code></td>
+        <td class="num">{{ '{:,}'.format(s.input_tokens) }}</td>
+        <td class="num">{{ '{:,}'.format(s.output_tokens) }}</td>
+        <td class="num">{{ '{:,}'.format(s.total_tokens) }}</td>
+        <td class="num">{{ '{:,}'.format(s.final_context_tokens) }}</td>
+        <td class="num">{{ s.avg_words_per_reply }}</td>
+        <td class="num">{{ s.avg_latency_s }}</td>
+        <td class="num">{{ s.reinjections }}</td>
+        <td class="num">{{ s.est_cost_usd if s.est_cost_usd is defined else '—' }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h3>Charts</h3>
+<div class="grid">
+  {% for chart in charts %}
+    <div><img src="{{ url_for('growth_chart', ts=run.ts, name=chart) }}" alt="{{ chart }}" style="width: 100%;"></div>
+  {% endfor %}
+</div>
+
+<h3>Turns</h3>
+{% for row in run.rows|sort(attribute='turn') if row.style_id == run.meta.get('styles', [])|first %}
+  {% set turn = row.turn %}
+  <details>
+    <summary>
+      <strong>turn {{ turn }}</strong> — {{ row.user|truncate(110) }}
+    </summary>
+    {% for r in run.rows if r.turn == turn %}
+      <article>
+        <header>
+          <code>{{ r.style_id }}</code>
+          · ctx {{ '{:,}'.format(r.input_tokens) }} tok
+          · reply {{ '{:,}'.format(r.output_tokens) }} tok
+          · {{ prose_words(r.output) }} words
+          · {{ (r.latency_ms / 1000)|round(1) }}s
+          {% if r.reinjected %}· <strong>reinjected</strong>{% endif %}
+        </header>
+        <pre style="white-space: pre-wrap;">{{ r.output }}</pre>
+      </article>
+    {% endfor %}
+  </details>
+{% endfor %}
+{% endblock %}

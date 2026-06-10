@@ -87,7 +87,12 @@ def _iter_all_rows(runs_dir: Path = RUNS_DIR) -> list[dict]:
     if not runs_dir.exists():
         return out
     for d in sorted(runs_dir.glob("*/")):
-        if not (d / "meta.json").exists():
+        meta_path = d / "meta.json"
+        if not meta_path.exists():
+            continue
+        # The report aggregates prompt x style scores; growth runs have a
+        # different row identity (turns) and are analyzed on their run page.
+        if data.run_type(json.loads(meta_path.read_text())) != "bench":
             continue
         rows = data._read_jsonl(d / "results.jsonl")
         scores = data._read_jsonl(d / "scores.jsonl")

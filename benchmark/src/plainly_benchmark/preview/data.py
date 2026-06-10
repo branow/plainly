@@ -18,6 +18,10 @@ class RunSummary:
     n_rows: int
     expected: int
 
+    @property
+    def type(self) -> str:
+        return run_type(self.meta)
+
 
 @dataclass
 class Run:
@@ -30,6 +34,18 @@ class Run:
     @property
     def styles(self) -> list[str]:
         return self.meta.get("styles", [])
+
+
+@dataclass
+class GrowthRun:
+    ts: str
+    meta: dict
+    rows: list[dict]
+
+
+# Older run dirs predate the meta `type` field; they are all bench runs.
+def run_type(meta: dict) -> str:
+    return meta.get("type", "bench")
 
 
 def _count_lines(path: Path) -> int:
@@ -59,11 +75,11 @@ def _read_jsonl(path: Path) -> list[dict]:
 
 
 def _expected_rows(meta: dict) -> int:
-    return (
-        len(meta.get("prompts", []))
-        * len(meta.get("styles", []))
-        * meta.get("samples", 1)
-    )
+    if run_type(meta) == "growth":
+        units = meta.get("turns", 0)
+    else:
+        units = len(meta.get("prompts", []))
+    return units * len(meta.get("styles", [])) * meta.get("samples", 1)
 
 
 def list_runs(runs_dir: Path = RUNS_DIR) -> list[RunSummary]:
@@ -90,13 +106,16 @@ def load_run(
     ts: str,
     runs_dir: Path = RUNS_DIR,
     prompts_dir: Path = PROMPTS_DIR,
-) -> Run | None:
+) -> Run | GrowthRun | None:
     d = runs_dir / ts
     meta_path = d / "meta.json"
     if not meta_path.exists():
         return None
     meta = json.loads(meta_path.read_text())
     rows = _read_jsonl(d / "results.jsonl")
+
+    if run_type(meta) == "growth":
+        return GrowthRun(ts=ts, meta=meta, rows=rows)
 
     scores = _read_jsonl(d / "scores.jsonl")
     by_key = {(s["prompt_slug"], s["style_id"], s["sample"]): s for s in scores}
