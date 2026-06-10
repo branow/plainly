@@ -24,9 +24,8 @@ export const STATE_FILE = join(DATA_DIR, "plainly.state");
 const LOG_FILE = join(DATA_DIR, "plainly.log");
 const LOG_MAX_BYTES = 1024 * 1024; // safety cap on runaway log growth
 
-function metricsFile(sessionId) {
-  return join(DATA_DIR, `metrics-${sessionId}.json`);
-}
+const METRICS_FILE = join(DATA_DIR, "metrics.json");
+const METRICS_MAX_BYTES = 1024 * 1024; // same cap policy as the log
 
 // Create the data dir if missing. Returns true on success.
 function ensureDir() {
@@ -145,26 +144,36 @@ export function countProseWords(text) {
   return prose ? prose.split(/\s+/).filter(Boolean).length : 0;
 }
 
-// Per-session metrics live in metrics-<sessionId>.json with the shape:
-//   { counts: number[], lastNudgeAt: number }
+// All sessions' metrics live in one metrics.json keyed by session id:
+//   { "<sessionId>": { counts: number[], lastNudgeAt: number, updated: number } }
 // `counts` is the prose word count of each chat reply, in order. `lastNudgeAt`
 // is the counts index at which the last reminder was injected, used for the
-// cooldown. A brand-new session has no file yet.
+// cooldown. `updated` is a ms timestamp used to evict the oldest sessions
+// when the file grows past the cap. A brand-new session has no entry yet.
 
-// Read a session's metrics. Returns a fresh default when the file does not
-// exist (new session) or cannot be parsed.
-export function loadMetrics(sessionId, hook) {
+// Read the whole metrics map. Returns {} when the file does not exist or
+// cannot be parsed.
+function loadAllMetrics(hook) {
   try {
-    return JSON.parse(readFileSync(metricsFile(sessionId), "utf8"));
+    return JSON.parse(readFileSync(METRICS_FILE, "utf8"));
   } catch (e) {
     if (e.code !== "ENOENT") {
-      logError(hook, "load-metrics", e, { session: sessionId });
+      logError(hook, "load-metrics", e);
     }
-    return { counts: [], lastNudgeAt: -999 };
+    return {};
   }
 }
 
-// Write a session's metrics back to disk.
+// Read one session's metrics. Returns a fresh default for a new session.
+export function loadMetrics(sessionId, hook) {
+  return (
+    loadAllMetrics(hook)[sessionId] || { counts: [], lastNudgeAt: -999 }
+  );
+}
+
+// Write one session's metrics back into the shared file. Over the cap: drop
+// the least-recently-updated half of the sessions, mirroring how the log
+// keeps its most recent half.
 export function saveMetrics(sessionId, data, hook) {
   if (!ensureDir()) {
     const e = { message: "could not create data dir" };
@@ -173,8 +182,23 @@ export function saveMetrics(sessionId, data, hook) {
   }
 
   try {
-    writeFileSync(metricsFile(sessionId), JSON.stringify(data));
+    const all = loadAllMetrics(hook);
+    all[sessionId] = { ...data, updated: Date.now() };
+
+    let json = JSON.stringify(all);
+    if (json.length >= METRICS_MAX_BYTES) {
+      json = JSON.stringify(evictOldestSessions(all));
+    }
+
+    writeFileSync(METRICS_FILE, json);
   } catch (e) {
     logError(hook, "save-metrics", e, { session: sessionId });
   }
+}
+
+function evictOldestSessions(all) {
+  const kept = Object.entries(all)
+    .sort(([, a], [, b]) => (b.updated || 0) - (a.updated || 0))
+    .slice(0, Math.ceil(Object.keys(all).length / 2));
+  return Object.fromEntries(kept);
 }
