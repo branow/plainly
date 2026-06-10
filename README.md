@@ -122,6 +122,28 @@ Time to get the answer — % faster than default
 
 Reproduce: [`benchmark/`](./benchmark).
 
+### Long sessions — the gap compounds
+
+Single-prompt savings understate the real effect: every turn resends the whole
+history, so shorter replies make every later request cheaper too. The growth
+benchmark replays the same 25-turn engineering conversation in three real
+Claude Code sessions (opus, tools off) — no plugin, the caveman plugin, and
+plainly — with each plugin's actual hooks running.
+
+| | baseline | caveman | **plainly** |
+|---|---:|---:|---:|
+| total tokens, 25 turns | 1,346,642 | 868,931 | **666,087 (-51%)** |
+| context at turn 25 | 87,773 | 49,481 | **33,331 (-62%)** |
+| avg words per reply | 523 | 355 | **172 (-67%)** |
+| style interventions | — | every turn | **1** |
+
+caveman re-asserts its style on every user message and still drifted to 355
+words a reply by the late turns. plainly's drift detector fired once — after
+two legitimately long turns (a code request, a walk-me-through) pushed the
+average over threshold — and replies snapped back for the rest of the session.
+
+Reproduce: `uv run growth-bench --backend claude_code --arm baseline --arm plainly=<repo>` in [`benchmark/`](./benchmark).
+
 ---
 
 ## How plainly differs
