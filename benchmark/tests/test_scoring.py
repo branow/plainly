@@ -85,9 +85,20 @@ def test_score_variants(data_file: Path, scorer: Scorer, prompts_by_id: dict[int
         assert 0 <= s.combined <= 1.0
 
 
-def test_length_sim_clamps_to_zero_when_response_double_ideal(scorer: Scorer) -> None:
+def test_length_sim_forgives_small_absolute_excess(scorer: Scorer) -> None:
+    # ideal=5 words → tolerance=max(20, 0.2*5)=20, so a 20-word response
+    # (delta 15) sits inside the band and is not penalized.
     ideal = "one two three four five"
-    response = " ".join(["x"] * 20)  # 4x ideal → delta clamped → 0
+    response = " ".join(["x"] * 20)
+    s = scorer.score_one(response, ideal, prompt_slug="t", style_id="t", sample=0)
+    assert s.length_sim == 1.0
+
+
+def test_length_sim_clamps_to_zero_when_response_far_exceeds_ideal(scorer: Scorer) -> None:
+    # ideal=5 words → tolerance=20, denom=50: excess hits the denominator
+    # at delta>=70 words, so a 100-word response clamps to 0.
+    ideal = "one two three four five"
+    response = " ".join(["x"] * 100)
     s = scorer.score_one(response, ideal, prompt_slug="t", style_id="t", sample=0)
     assert s.length_sim == 0.0
 
